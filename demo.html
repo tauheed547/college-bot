@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot JavaScript</title>
+  <style>
+       /* CSS Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      font-family: sans-serif;
+      background: url("https://wallpaperaccess.com/full/1711834.gif");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; /* Align content to the left */
+      padding-left: 3rem; /* Add padding to the left */
+    }
+
+    .glass {
+      width: 550px;
+      height: 400px;
+      background-color: rgba(173, 216, 230, 0.7);
+      padding: 50px;
+      color: white; /* Black text inside */
+      border-radius: 20px;
+      border: none;
+      box-shadow: 
+        0 0 15px rgba(0, 255, 255, 0.8), /* Neon blue outer shadow */
+        0 0 30px rgba(0, 255, 255, 0.6),
+        0 0 45px rgba(0, 255, 255, 0.4);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .glass h1 {
+      font-size: 1.8rem;
+      text-shadow: 0 0 10px rgba(192, 192, 192, 0.7);
+    }
+
+    .input {
+      width: 100%;
+      margin-top: 40px;
+    }
+
+    .input input {
+      width: 100%;
+      height: 55px;
+      border: 2px solid rgba(0, 255, 255, 0.8);
+      background-color: transparent;
+      color: white; /* Black text for the input field */
+      padding-left: 20px;
+      font-family: "Orbitron", sans-serif; /* Robotic font style */
+
+      font-size: 1.5rem;
+      border-radius: 20px;
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    }
+
+    .input input::placeholder {
+      color: white; /* Blackish placeholder */
+    }
+
+    .glass p {
+      font-size: 1.6rem;
+      margin-top: 30px;
+      color: black;
+    }
+
+    #chatLog {
+      display: none; /* Initially hide the chat log */
+    }
+
+   .help-button {
+     position: fixed; /* Fixed positioning so it stays at the bottom-right of the page */
+     bottom: 20px; /* Position from the bottom */
+     right: 20px; /* Position from the right */
+     font-size: 40px; /* Size of the message emoji */
+     color: rgba(0, 255, 255, 0.8); /* Neon blue color */
+     background: none; /* No background */
+     border: none; /* No border */
+     display: inline-block;
+     text-decoration: none; /* Remove underline */
+     cursor: pointer; /* Pointer cursor on hover */
+     opacity: 0.9; /* Slight transparency */
+     transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease; /* Smooth hover effect */
+     z-index: 1000; /* Ensure it stays on top of other elements */
+   }
+
+   .help-button::after {
+     content: "?"; /* Add the question mark inside the emoji */
+     position: absolute;
+     top: 18px; /* Adjust this value to control the vertical position of the question mark */
+     left: 23px; /* Adjust this value to control the horizontal position of the question mark */
+     font-size: 18px; /* Size of the question mark */
+     color: black; /* Color of the question mark */
+   }
+
+    .help-button:hover {
+     color: rgba(127, 255, 212, 1); /* Brighter glow on hover */
+     transform: scale(1.2); /* Slight zoom effect on hover */
+     opacity: 1; /* Full opacity on hover */
+   }
+
+  </style>
+
+</head>
+<body>
+  <div class="glass">
+    <h1 style="font-family: 'Roboto', sans-serif; font-size: 2rem; font-weight: bold; text-transform: uppercase; text-decoration: underline; margin-bottom: 10px; color: #ffffff;">
+     <u>COLLEGE MANTRA</u>
+    </h1>
+    <p style="font-family: 'Roboto', sans-serif; font-size: 1.2rem; color: #d1f7ff; margin-top: 10px; line-height: 1.5;">
+     Your all-in-one college guide!<br>Explore SRIT Like Never Before!
+    </p>
+
+    <div class="input">
+      <input
+        type="text"
+        id="userBox"
+        onkeydown="if(event.keyCode == 13){ talk() }"
+        placeholder="Type your Question"
+      />
+    </div>
+    <p id="chatLog"></p> <!-- Initially empty chat log -->
+  </div>
+
+  <!-- Circular button for Help -->
+ <a href="help.html" class="help-button">💬</a>
+  <script>
+    // Embedded JavaScript Functionality
+    function talk() {
+     var user = document.getElementById('userBox').value.trim().toLowerCase();
+     var chatLog = document.getElementById('chatLog');
+     chatLog.innerHTML = "";
+     chatLog.style.display = 'block';
+     let s = user.toLowerCase();
+    // Responses for known queries, including location details
+    var know = {
+      "library": "The library is located on the C-block 2nd floor",
+      "canteen": "The canteen is located beside the main block",
+      "cse hod cabin": "It is at b block 2nd floor",
+      "hod cabin of cse":"It is at b block 2nd floor",
+      "cse department":"It is at b block 2nd floor",
+      "hod cabin of computer science and engineering":"It is at b block 1st floor",
+      "examination section": "Located at the main block",
+      "exam centre": "Present at the main block ground floor",
+      "fee payment": "It will be there in the main block",
+      "pay fee": "In the main block",
+      "computer labs":"There is one in the b-block, c-block and as well as main block",
+      "administration office": "The administration office is in main block",
+      "faculty room": "The faculty room is on the first floor of Block B." 
+    };
+
+    // Check if the user's input includes keywords for location queries
+    if (user.includes("find location of") || user.includes("where is") || user.includes("find the location of")){
+      // Extract the location name from the input
+      var location = user
+        .replace("find location of", "")
+        .replace("find the location of","")
+        .replace("where is", "")
+        .trim();
+
+      if (know[location]) {
+        chatLog.innerHTML += know[location] + "<br>";
+      } 
+      
+      else {
+        chatLog.innerHTML += "Sorry, I couldn't find that location in the college.<br>";
+      }
+    }  
+    // Handle specific predefined queries
+    else if (user === "who are you") {
+      chatLog.innerHTML += "Hello, Iam College mantra your chat assistant.<br>";
+    }
+
+    else if (user === "hi") {
+      chatLog.innerHTML += "Hello! How can I help you today<br>";
+    }
+
+    else if (user === "hello") {
+      chatLog.innerHTML += "Hi! How can I help you?<br>";
+    }
+
+    else if (user === "what is your name") {
+      chatLog.innerHTML += "You can call me college mantra<br>";
+    }
+
+    else if (user === "what can you do") {
+      chatLog.innerHTML += "I'm here to help you with any kind of information related to SRIT<br>";
+    }
+
+    else if (user === "srit") {
+      chatLog.innerHTML += "Srinivasa Ramanujan Institute Of Technology<br>";
+    }
+
+    else if (user === "who created you") {
+      chatLog.innerHTML += "I have created by four students from CSE<br>";
+    }
+
+    else if (user === "who are they") {
+      chatLog.innerHTML += "Navya-555, Madhuri-543, Tauheed-547, Rehan-554<br>";
+    }
+
+    else if (user === "Good morning") {
+      chatLog.innerHTML += "Good morning ☺, how can I help you?<br>";
+    }
+    
+    else if (user === "how are you") {
+      chatLog.innerHTML += "Good :)<br>";
+    } 
+
+    else if (user === "contact number") {
+      chatLog.innerHTML += "tel:9515611111<br>";
+    } 
+    
+    else if (user === "bye") {
+      chatLog.innerHTML += "Okay! Will meet soon.<br>";
+    }  
+    
+    else if (user === "how do you do") {
+       chatLog.innerHTML += "Good :)<br>";
+    }
+    
+    else if (s.includes("whatsapp")) {
+        // Open WhatsApp if the input includes "open whatsapp"
+       window.open("whatsapp://", "_blank");
+    }
+
+    else if (s.includes("youtube")) {
+    // Open YouTube if the input includes "open youtube"
+    window.open("https://www.youtube.com", "_blank");
+    }
+
+    else if (s.includes("instagram")) {
+    // Open Instagram if the input includes "open instagram"
+    window.open("https://www.instagram.com", "_blank");
+    }
+
+    else if (s.includes("calculator")) {
+    // Open Calculator if the input includes "open calculator"
+    window.open("calc://", "_blank");
+    }
+
+    else if (s.includes("settings")) {
+    // Open Settings if the input includes "open settings"
+    window.open("ms-settings://", "_blank");
+    }
+
+    else if (s.includes("college website") || s.includes("college portal") || s.includes("srit website") || s.includes("srit college website")|| s.includes("home page")) {
+       window.open("https://www.srit.ac.in/");
+    }
+
+    else if (s.includes("exam portal")|| s.includes("exam website") || s.includes("results")) {
+      window.open("https://sritexams.in/eportal/Login.aspx");
+    }
+
+    else if (s.includes("faculty ecap")|| s.includes("faculty login")|| s.includes("employee login")) {
+      window.open("http://webprosindia.com/srit/ ");
+    }
+
+    else if (s.includes("student ecap")|| s.includes("student login")) {
+      window.open("http://webprosindia.com/sritstudent/");
+    }
+
+    else if (s.includes("alumni")) {
+      window.open("http://alumni.srit.ac.in/ ");
+    }
+
+    else if (s.includes("contact")) {
+      window.open("https://www.srit.ac.in/contact-us/");
+    }
+
+    else if (s.includes("vision and mission")) {
+      window.open("https://www.srit.ac.in/vision-mission/");
+    }
+
+    else if (s.includes("course")) {
+      window.open("https://www.srit.ac.in/courses-offered/ ");
+    }
+
+    else if (s.includes("admission procedure")|| s.includes("admission")) {
+      window.open("https://www.srit.ac.in/admission-procedure/");
+    }
+
+    else if (s.includes("fee structure") || s.includes("fee")) {
+    window.open("https://www.srit.ac.in/fee-structure/");
+    }
+
+    else if (s.includes("academic calender") || s.includes("open academic calenders")) {
+    window.open("https://www.srit.ac.in/academic-calendars/ ");
+    }
+
+    else if (s.includes("academic regulation")) {
+    window.open("https://www.srit.ac.in/academic-regulations/");
+    }
+
+    else if (s.includes("cse department")|| s.includes("computer science")|| s.includes("computer science and engineering")|| s.includes("cse details")) {
+    window.open("https://www.srit.ac.in/computer-science-engineering-2/");
+    }
+
+    else if (s.includes("csm department")|| s.includes("csm details")|| s.includes("artificial intelligence")|| s.includes("machine learning")|| s.includes("aiml")|| s.includes("ai and ml")) {
+    window.open("https://www.srit.ac.in/cse-artificial-intelligence-machine-learning-2/");
+    } 
+
+    else if (s.includes("csd department")|| s.includes("csd details")|| s.includes("computer science in data science engineering")|| s.includes("data science")|| s.includes("ds")) {
+    window.open("https://www.srit.ac.in/cse-data-science/");
+    }
+
+   else if (s.includes("ece department")|| s.includes("ece details")|| s.includes("electrical and communication engineering")|| s.includes("electronics and communication")) {
+    window.open("https://www.srit.ac.in/electronics-communication-engineering-2/");
+   } 
+
+   else if (s.includes("eee department")|| s.includes("eee details")|| s.includes("electrical and electronics engineering")|| s.includes("electrical")|| s.includes("electronics")) {
+    window.open("https://www.srit.ac.in/eee-2/");
+   } 
+
+   else if (s.includes("mec department")|| s.includes("mec details")|| s.includes("mechanical engineering")|| s.includes("mech details")|| s.includes("mechanical")|| s.includes("mech department")) {
+    window.open("https://www.srit.ac.in/mec-2/");
+   } 
+
+   else if (s.includes("civil department")|| s.includes("civil details")|| s.includes("civil engineering")) {
+    window.open("https://www.srit.ac.in/civil-engineering-2/");
+   } 
+
+   else if (s.includes("h&s") || s.includes("humanities")|| s.includes("sciences")|| s.includes("h and s")) {
+    window.open("https://www.srit.ac.in/humanities-science-2/");
+   }
+
+   else if (s.includes("chairman's club")|| s.includes("chairmans")) {
+    window.open("https://www.srit.ac.in/chairmansclub/");
+   } 
+
+   else if (s.includes("iei")|| s.includes("institute of engineers")) {
+    window.open("https://www.srit.ac.in/iei/");
+   } 
+
+   else if (s.includes("internet society")) {
+    window.open("https://www.srit.ac.in/internet-society/");
+   } 
+
+   else if (s.includes("iete")|| s.includes("institute of electronics and telecommunication engineers")) {
+    window.open("https://www.srit.ac.in/iete/");
+   } 
+
+   else if (s.includes("ici")|| s.includes("indian concrete institute")) {
+    window.open("https://www.srit.ac.in/ici/");
+   } 
+
+   else if (s.includes("iste")|| s.includes("indian society for technical education")) {
+    window.open("https://www.srit.ac.in/iste/");
+   }
+
+   else if (s.includes("sae")|| s.includes("society of automative engineering")) {
+    window.open("https://www.srit.ac.in/sae/");
+   } 
+
+   else if (s.includes("toastmasters international club")|| s.includes("toastmasters")|| s.includes("toast masters")) {
+    window.open("https://www.srit.ac.in/toast-masters-international-club/");
+   } 
+
+   else if (s.includes("english language club")|| s.includes("english language club")) {
+    window.open("https://www.srit.ac.in/english-language-club/");
+   }
+
+   else if (s.includes("ndli")|| s.includes("national digital library of india club")) {
+    window.open("https://www.srit.ac.in/ndli-club/");
+   }
+
+   else if (s.includes("programmers")|| s.includes("programmers's")) {
+    window.open("https://www.srit.ac.in/programmers-club/");
+   }
+
+   else if (s.includes("notifications and results")|| s.includes("notifications")) {
+    window.open("https://www.srit.ac.in/notifications/");
+   } 
+
+   else if (s.includes("e-services") || s.includes("exam portal") || s.includes("fee payment portal")|| s.includes("online payment")|| s.includes("pay")) {
+    window.open("https://sritexams.in/eportal/Login.aspx");
+   }
+
+   else if (s.includes("previous question papers")|| s.includes("question papers")) {
+    window.open("https://www.srit.ac.in/previous-question-papers/");
+   } 
+
+   else if (s.includes("exam committee")|| s.includes("examination commitee")|| s.includes("exam section")|| s.includes("examination section")) {
+    window.open("https://www.srit.ac.in/exam-committee/");
+   }
+
+   else if (s.includes("results committee")) {
+    window.open("https://www.srit.ac.in/results-committee/");
+   } 
+
+   else if (s.includes("evaluation")|| s.includes("evaluate")) {
+    window.open("https://www.srit.ac.in/evaluation-procedure-2/");
+   } 
+
+   else if (s.includes("malpractice")) {
+    window.open("https://www.srit.ac.in/malpractice-rules/");
+   }
+
+   else if (s.includes("placement committee")|| s.includes("placement team")|| s.includes("placemnt coordinator")|| s.includes("placement co-ordinator")) {
+    window.open("https://www.srit.ac.in/training-placement-team-members/");
+   }
+
+   else if (s.includes("training program")|| s.includes("training")|| s.includes("training and placement")) {
+    window.open("https://www.srit.ac.in/training-program/");
+   }
+
+   else if (s.includes("campus drive")|| s.includes("drive")) {
+    window.open("https://www.srit.ac.in/campus-drives/");
+   }
+
+   else if (s.includes("placement information")|| s.includes("placement")) {
+    window.open("https://www.srit.ac.in/training-placement-statistics/");
+   } 
+
+   else if (s.includes("ncc")|| s.includes("national cadet corps")) {
+    window.open("https://www.srit.ac.in/national-cadet-corps/");
+   } 
+
+   else if (s.includes("nss")|| s.includes("national service scheme")) {
+    window.open("https://www.srit.ac.in/national-service-scheme/");
+   } 
+
+   else if (s.includes("rotary club")|| s.includes("rotract")) {
+    window.open("https://www.srit.ac.in/rotaract-club/");
+   }
+
+   else if (s.includes("instagram account")|| s.includes("college instagram")) {
+    window.open("https://www.instagram.com/sritatp/");
+   } 
+
+   else if (s.includes("twitter account")|| s.includes("college twitter")) {
+    window.open("https://x.com/sritatp/?mx=2");
+   }
+
+   else if (s.includes("facebook account")|| s.includes("college facebook")) {
+    window.open("https://www.facebook.com/@sritatp/?ref=embed_page");
+   } 
+
+   else if (s.includes("youtube account")|| s.includes("college youtube")) {
+    window.open("https://www.youtube.com/channel/UC_J4p9Xovt4UGP6ddPzr42g");
+   } 
+
+   else if (s.includes("linkedin account")|| s.includes("college linkedin")) {
+    window.open("https://www.linkedin.com/school/sritatp/");
+   } 
+
+   else if (s.includes("chairperson")) {
+    window.open("https://www.srit.ac.in/about-chairperson/");
+   }
+
+    else if (s.includes("secretary")|| s.includes("founder")) {
+    window.open("https://www.srit.ac.in/about-founder-secretary/");
+   }
+
+   else if (s.includes("principal")) {
+    window.open("https://www.srit.ac.in/principal/");
+   } 
+
+   else if (s.includes("governing council")) {
+    window.open("https://www.srit.ac.in/governing-council/");
+   } 
+
+   else if (s.includes("academic council")) {
+    window.open("https://www.srit.ac.in/academic-council/");
+   } 
+
+   else if (s.includes("newsletter")) {
+    window.open("https://www.srit.ac.in/news-letters/");
+   }
+
+   else if (s.includes("cse hod")|| s.includes("veera prakash")) {
+    window.open("https://sites.google.com/view/pvprakash/home ");
+   } 
+
+   else if (s.includes("csm and csd hod")|| s.includes("csm hod")|| s.includes("csd hod")|| s.includes("chitralingappa")|| s.includes("chitralingapa")) {
+    window.open("https://sites.google.com/view/drpcl/home");
+   } 
+
+   else if (s.includes("ece hod")|| s.includes("ravichandra")|| s.includes("ravi chandra")) {
+    window.open("https://sites.google.com/view/drmlravichandra/");
+   } 
+
+   else if (s.includes("eee hod")|| s.includes("meerimatha")|| s.includes("merimatha")|| s.includes("meeri matha")|| s.includes("meri maatha")|| s.includes("meri matha")) {
+    window.open("https://sites.google.com/view/meerimathaeee/home?authuser=0");
+   }
+
+   else if (s.includes("civil hod")|| s.includes("venkatareddy")|| s.includes("venkata reddy")) {
+    window.open("https://sites.google.com/srit.ac.in/drtcvenkatareddy/home");
+   } 
+
+   else if (s.includes("mech hod")|| s.includes("mec hod")|| s.includes("vamsi krishna")|| s.includes("vamsikrishnareddy")|| s.includes("vamsikrishna")) {
+    window.open("https://sites.google.com/view/vamsi-krishna-reddy/home?authuser=0 ");
+   }
+   
+   else if (s.includes("rajesh babu")) {
+    window.open("https://sites.google.com/view/rajeshbabu/home");
+}
+else if (s.includes("qubeb")) {
+    window.open("https://sites.google.com/srit.ac.in/smpqubebmtechphd/home");
+}
+else if (s.includes("lokeswari")) {
+    window.open("https://sites.google.com/srit.ac.in/lokeswarig/home");
+}
+else if (s.includes("jagadeeswara prasad")) {
+    window.open("https://sites.google.com/srit.ac.in/jagadeeswaraprasadpv/about");
+}
+else if (s.includes("praneel kumar")) {
+    window.open("https://sites.google.com/srit.ac.in/praneelkumarperuru/home");
+}
+else if (s.includes("lakshmi narayana reddy")) {
+    window.open("https://sites.google.com/view/dlnreddy");
+}
+else if (s.includes("nazeer shaik")|| s.includes("nazeer")) {
+    window.open("https://sites.google.com/view/nazeershaik/home");
+}
+else if (s.includes("sudha gowd")) {
+    window.open("https://sites.google.com/srit.ac.in/sudha/home");
+}
+else if (s.includes("shajahan")) {
+    window.open("https://sites.google.com/srit.ac.in/pagidipalle-shajahan/home");
+}
+else if (s.includes("shirisha")) {
+    window.open("https://sites.google.com/srit.ac.in/sirisha-p");
+}
+else if (s.includes("sudhakar")) {
+    window.open("");
+}
+else if (s.includes("nagaprabhakar")|| s.includes("naga prabhakar")) {
+    window.open("");
+}
+else if (s.includes("lakshminatha reddy")) {
+    window.open("https://sites.google.com/view/clnreddy/home");
+}
+else if (s.includes("ranjit reddy")|| s.includes("ranjith")|| s.includes("ranjith reddy")) {
+    window.open("https://sites.google.com/view/ranjit");
+}
+else if (s.includes("venkata naga jayudu")) {
+    window.open("https://sites.google.com/prod/view/tvnjayudu");
+}
+else if (s.includes("hemanth kumar yadav")|| s.includes("hemanth kumar")) {
+    window.open("https://sites.google.com/srit.ac.in/hemanthkumaryadav-cse/home");
+}
+else if (s.includes("sasikala")) {
+    window.open("https://sites.google.com/view/drcsasikala/home");
+}
+else if (s.includes("hari chandana")|| s.includes("harichandana")) {
+    window.open("https://sites.google.com/srit.ac.in/harichandana/home");
+}
+else if (s.includes("suman")) {
+    window.open("https://sites.google.com/srit.ac.in/ssuman/home");
+}
+else if (s.includes("narasimhulu")) {
+    window.open("https://sites.google.com/view/mr-m-narasimhulu/home");
+}
+else if (s.includes("chinna pullaiah")|| s.includes("china pullaiah")) {
+    window.open("https://sites.google.com/srit.ac.in/gandla-chinna-pullaiah");
+}
+else if (s.includes("sudheer kumar")|| s.includes("sudheer")) {
+    window.open("https://sites.google.com/srit.ac.in/sudheerkumar/home");
+}
+else if (s.includes("kavitha")) {
+    window.open("https://sites.google.com/srit.ac.in/kavitha");
+}
+else if (s.includes("soumya")|| s.includes("sowmya")) {
+    window.open("https://sites.google.com/srit.ac.in/soumya-madduru/home");
+}
+else if (s.includes("sreedhar")) {
+    window.open("https://sites.google.com/srit.ac.in/sreedhar/home");
+}
+else if (s.includes("shabana")) {
+    window.open("https://sites.google.com/srit.ac.in/gshabana");
+}
+else if (s.includes("bala ankanna")) {
+    window.open("https://sites.google.com/srit.ac.in/abalaankanna");
+}
+else if (s.includes("erriswami")) {
+    window.open("https://sites.google.com/srit.ac.in/swamy/home");
+}
+else if (s.includes("kondanna")) {
+    window.open("https://sites.google.com/view/kondanna/home");
+}
+else if (s.includes("venkatesh")) {
+    window.open("https://sites.google.com/view/kvenkatesh/home");
+}
+else if (s.includes("sujatha")) {
+    window.open("https://sites.google.com/srit.ac.in/vsujatha/home");
+}
+else if (s.includes("lokeshnath")) {
+    window.open("https://sites.google.com/srit.ac.in/lokeshnath-k/home");
+}
+else if (s.includes("rohini")) {
+    window.open("https://sites.google.com/srit.ac.in/rohini/home");
+}
+else if (s.includes("ushasree")|| s.includes("usha")) {
+    window.open("https://sites.google.com/view/ushasree/home");
+}
+else if (s.includes("umadevi")|| s.includes("uma")) {
+    window.open("https://sites.google.com/view/kambamumadevi/home");
+}
+else if (s.includes("nagaleela")) {
+    window.open("https://sites.google.com/srit.ac.in/nagaleela-g/home");
+}
+else if (s.includes("sunitha")) {
+    window.open("https://sites.google.com/srit.ac.in/sunitha-s/home");
+}
+else if (s.includes("manjeera")) {
+    window.open("https://sites.google.com/view/manjeerapatil");
+}
+else if (s.includes("kamakshamma")) {
+    window.open("https://sites.google.com/srit.ac.in/v-kamakshamma/home");
+}
+else if (s.includes("ganesh")) {
+    window.open("https://sites.google.com/srit.ac.in/ganeshcse/home");
+}
+else if (s.includes("jeevana jyothi")) {
+    window.open("https://sites.google.com/srit.ac.in/jeevana-jyothi-d/home");
+}
+else if (s.includes("vijay bhaskar reddy")) {
+    window.open("https://sites.google.com/view/vjaireddy/home");
+}
+else if (s.includes("ram bayapa reddy")) {
+    window.open("https://sites.google.com/srit.ac.in/bayapareddy/home");
+}
+else if (s.includes("nagesh")) {
+    window.open("https://sites.google.com/srit.ac.in/nagesh-cse/home");
+}
+else if (s.includes("r20")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/1sz-IjJAZeRjpAyVm5w9JYcdJ2umT6IRn/view?usp%3Ddrive_link&sa=D&source=editors&ust=1736055884140001&usg=AOvVaw1zebK6EvKBqbizqu_HeyEO");
+}
+else if (s.includes("r23")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/11jU0WSjOXgqbMZk4JEBbQxHmvCaaam6N/view?usp%3Ddrive_link&sa=D&source=editors&ust=1736055884140175&usg=AOvVaw00QEnsfXI0sm2Ce5kc5XkM");
+}
+else if (s.includes("r15")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/1QKlBHXxonJiKiO2GC-4JhtJbmo5p9m7o/view?usp%3Dsharing&sa=D&source=editors&ust=1736055884139571&usg=AOvVaw3EDlhFbl_pTrMqEeNBBtk5");
+}
+else if (s.includes("r19")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/1ylmJxTKFh7FcX9sc0BRk9Y38Ri_Y_Bsm/view?usp%3Dsharing&sa=D&source=editors&ust=1736055884139811&usg=AOvVaw06Z19hMeHwYAFpVMWBRqo3");
+}
+else if (s.includes("r20 course structure")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/1r-Pqj9dzZFOgE0iKDqoNouLeiPDu53-g/view?usp%3Dshare_link&sa=D&source=editors&ust=1736055884140741&usg=AOvVaw0h1IZuL7ovSqmNLtnzBiLG");
+}
+else if (s.includes("r19 course structure")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/18oSbtYtWxG4Z2JHwqq6bcOs2zxNgTvHp/view?usp%3Ddrive_link&sa=D&source=editors&ust=1736055884140431&usg=AOvVaw31nHXg0QFMqvzkb_kgq9rX");
+}
+else if (s.includes("r20 syllabus")) {
+    window.open("https://www.google.com/url?q=https://drive.google.com/file/d/1CBJzGrNsfJlMvuxAb3Oci1p8cTT-I2-v/view?usp%3Ddrive_link&sa=D&source=editors&ust=1736055884140864&usg=AOvVaw1RKOx64bg8Onplxo0KifwD");
+}
+else if (s.includes("eamcet")||s.includes("eapcet")) {
+    window.open("https://www.srit.ac.in/previousranks/");
+}
+else if (s.includes("about college")||s.includes("college details")) {
+    window.open("https://drive.google.com/file/d/1HminceY6KXEMxH5SqKnVedr1GRyviuf8/view?usp=sharing");
+}
+
+else {
+        // If no match is found, perform a Google search
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(user)}`, '_blank');
+   }
+
+      // Show the chat log after input is provided
+    chatLog.style.display = 'block';
+
+    // Clear the input field after submitting
+    document.getElementById('userBox').value = '';
+
+  }
+  </script>
+</body>
+</html>
